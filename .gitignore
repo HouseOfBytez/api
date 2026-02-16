@@ -1,0 +1,19 @@
+# dependencies
+/node_modules
+
+# testing
+/coverage
+
+# production
+/dist
+
+# lock
+package-lock.json
+
+# misc
+.DS_Store
+*.pem
+
+# env
+!.env.example
+.env*
