@@ -1,4 +1,12 @@
-export const env = {
-	PORT: Number(process.env.PORT) || 3000,
-	NODE_ENV: process.env.NODE_ENV || "development",
-} as const;
+import { z } from "zod";
+
+const envSchema = z.object({
+	PORT: z.coerce.number().default(3000),
+	NODE_ENV: z.enum([
+		"development",
+		"production",
+		"test"
+	]).default("development"),
+});
+
+export const env = envSchema.parse(process.env);
