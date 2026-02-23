@@ -16,6 +16,14 @@ jobs:
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H 129.212.227.142 >> ~/.ssh/known_hosts
+          
+          # Debug: Check if key was written
+          echo "SSH key file size:"
+          ls -lh ~/.ssh/id_ed25519
+          
+          # Debug: Check key format
+          echo "First line of key:"
+          head -n 1 ~/.ssh/id_ed25519
 
       - name: Deploy to server
         run: |
