@@ -1,0 +1,54 @@
+name: Deploy API HouseOfBytez
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H 129.212.227.142 >> ~/.ssh/known_hosts
+
+      - name: Deploy to server
+        run: |
+          ssh sebastian@129.212.227.142 bash -s << 'EOF'
+            set -e
+
+            echo "🚀 Deploying API HouseOfBytez..."
+            cd /var/www/roserafinance/api
+
+            # Pull latest changes
+            echo "📥 Pulling latest code..."
+            git pull origin main
+
+            # Install dependencies
+            echo "📦 Installing dependencies..."
+            npm install
+
+            # Build TypeScript
+            echo "🔨 Building project..."
+            npm run build
+
+            # Restart PM2 as app user (passwordless sudo)
+            echo "🔄 Restarting PM2 as app user..."
+            sudo -u app pm2 restart api-houseofbytez || sudo -u app pm2 start dist/index.js --name api-houseofbytez
+
+            # Show status
+            echo ""
+            echo "✅ Deployment complete!"
+            sudo -u app pm2 list
+
+            # Test API endpoint
+            echo ""
+            echo "🏥 Testing API endpoint..."
+            sleep 2
+            curl -f http://localhost:3000/ && echo "" && echo "✅ API check passed!" || echo "⚠️ API check failed"
+          EOF
